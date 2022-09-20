@@ -9,42 +9,20 @@ class App extends React.Component {
   constructor(props){
     super(props);
     Spotify.getAccessToken(); //Get an access token first thing when the app loads
+
+    //If there's playlist data in localStorage, get it now
+    const playlistName = localStorage.getItem('playlistName');
+    const playlistTracks = JSON.parse(localStorage.getItem('playlistTracks'));
+    if(!playlistName || !playlistTracks){
+      playlistName = 'New playlist';
+      playlistTracks = [];
+    }
+
+
     this.state = {
-      searchResults: [
-        // {
-        //   name: 'default name 1',
-        //   artist: 'default artist 1',
-        //   album: 'default album 1',
-        //   id: 'default id 1'
-        // },
-        // {
-        //   name: 'default name 2',
-        //   artist: 'default artist 2',
-        //   album: 'default album 2',
-        //   id: 'default id 2'
-        // },
-        // {
-        //   name: 'default name 3',
-        //   artist: 'default artist 3',
-        //   album: 'default album 3',
-        //   id: 'default id 3'
-        // }
-      ],
-      playlistName: "My playlist",
-      playlistTracks: [
-        // {
-        //   name: 'playlist name 1',
-        //   artist: 'playlist artist 1',
-        //   album: 'playlist album 1',
-        //   id: 'playlist id 1'
-        // },
-        // {
-        //   name: 'playlist name 2',
-        //   artist: 'playlist artist 2',
-        //   album: 'playlist album 2',
-        //   id: 'playlist id 2'
-        // },
-      ]
+      searchResults: [],
+      playlistName: playlistName,
+      playlistTracks: playlistTracks
     }
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -57,10 +35,16 @@ class App extends React.Component {
     this.setState({playlistName: name})
   }
 
+  savePlaylistToLocalStorage(newTracks){
+    localStorage.setItem('playlistName', this.state.playlistName);
+    localStorage.setItem('playlistTracks', JSON.stringify(newTracks));
+  }
+
   removeTrack(track){
     let tracks = this.state.playlistTracks;
     const newList = tracks.filter( i => track.id !== i.id );
     this.setState({playlistTracks: newList})
+    this.savePlaylistToLocalStorage(newList);
   }
 
   addTrack(track){
@@ -70,6 +54,7 @@ class App extends React.Component {
       tracks.push(track);
     }
     this.setState({playlistTracks: tracks})
+    this.savePlaylistToLocalStorage(tracks);
   }
 
   async savePlaylist(){
